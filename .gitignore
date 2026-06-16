@@ -1,0 +1,17 @@
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+Thumbs.db
+
+# Large local/intermediate files generated during reruns
+*.rds
+*.RDS
+*.gct
+calcPhenotype_Output/
+GDCdata/
+
+# External web-tool returns should be deposited separately if needed
+CIBERSORTx_Job*_Results.csv
+TIDEx_results.csv
+
