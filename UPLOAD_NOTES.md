@@ -2,23 +2,21 @@
 
 ## Recommended Upload Route
 
-For submission to Journal of Cancer, the most practical route is:
+For manuscript submission and code availability, the practical route is:
 
-1. Create a public GitHub repository.
-2. Upload the contents of this folder.
-3. Create a versioned release, for example `v1.0-submission`.
-4. Archive the GitHub release in Zenodo to obtain a DOI.
-5. Put the Zenodo DOI in the manuscript Data Availability statement.
+1. Keep this GitHub repository public.
+2. Upload or push the contents of this code-release folder.
+3. Create a versioned release, for example `v1.0-medicine-submission`.
+4. Archive the GitHub release in Zenodo if a DOI is required by the journal.
+5. Put the GitHub URL or Zenodo DOI in the manuscript Data Availability statement.
 
-## Repository Name Suggestions
+## Repository Name Suggestion
 
 - `LUAD-hypoxia-nine-gene-signature`
-- `LUAD-hypoxia-prognostic-signature`
-- `joc-luad-hypoxia-signature`
 
 ## What To Upload
 
-Upload the files inside `JOC_code_release_ready_20260616`, not the entire manuscript folder.
+Upload only the code-release files in this repository.
 
 Do not upload:
 
@@ -34,4 +32,3 @@ Do not upload:
 - Decide whether to add an MIT License.
 - Confirm whether qPCR raw/processed files should remain only in supplementary materials or be mirrored in the repository.
 - After uploading, update the manuscript Data Availability statement with the final GitHub URL or Zenodo DOI.
-

@@ -1,6 +1,6 @@
 # ============================================================================
 # 04_prognostic_evaluation.R
-# Prognostic model evaluation: nomogram, calibration, DCA, C-index,
+# Prognostic model evaluation: nomogram, calibration, C-index,
 # clinical baseline table, univariate/multivariate Cox (Figure 3)
 # Requires: TCGA_LUAD_RiskScore_Clinical.csv from 03_LASSO_Cox_model.R
 # ============================================================================
@@ -13,7 +13,6 @@ library(dplyr)
 library(stringr)
 library(tableone)
 library(survminer)
-library(riskRegression)
 library(timeROC)
 
 dat <- read.csv("TCGA_LUAD_RiskScore_Clinical.csv", row.names = 1)
@@ -245,10 +244,10 @@ ggsave("Time_dependent_ROC_Hypoxia_Signature.pdf", p_roc,
        width = 14, height = 10)
 
 # ============================================================================
-# 7. DCA: Decision curve analysis (3-year OS)
+# 7. Model setup for C-index comparison
 # ============================================================================
 
-dca_data <- dat %>%
+cindex_data <- dat %>%
   mutate(
     OS_year  = as.numeric(OS.time / 365),
     OS_event = as.numeric(OS),
@@ -259,37 +258,11 @@ dca_data <- dat %>%
          !is.na(Risk_Score), !is.na(Age), !is.na(Gender))
 
 cox_risk     <- coxph(Surv(OS_year, OS_event) ~ Risk_Score,
-                       data = dca_data, x = TRUE)
+                       data = cindex_data, x = TRUE)
 cox_clinical <- coxph(Surv(OS_year, OS_event) ~ Age + Gender + Pathological_stage,
-                       data = dca_data, x = TRUE)
+                       data = cindex_data, x = TRUE)
 cox_combined <- coxph(Surv(OS_year, OS_event) ~ Risk_Score + Age + Gender +
-                       Pathological_stage, data = dca_data, x = TRUE)
-
-time_point <- 3
-dca_data$Risk_model_3y     <- as.numeric(predictRisk(cox_risk,
-                                       newdata = dca_data, times = time_point))
-dca_data$Clinical_model_3y <- as.numeric(predictRisk(cox_clinical,
-                                       newdata = dca_data, times = time_point))
-dca_data$Combined_model_3y <- as.numeric(predictRisk(cox_combined,
-                                       newdata = dca_data, times = time_point))
-
-dca_3y <- dca(Surv(OS_year, OS_event) ~ Risk_model_3y +
-               Clinical_model_3y + Combined_model_3y,
-  data = dca_data, time = 3,
-  thresholds = seq(0.05, 0.50, by = 0.01),
-  as_probability = c("Risk_model_3y", "Clinical_model_3y", "Combined_model_3y"),
-  label = list(Risk_model_3y = "Risk score",
-               Clinical_model_3y = "Clinical model",
-               Combined_model_3y = "Combined model")
-)
-
-p_dca <- plot(dca_3y, smooth = FALSE) +
-  labs(title = "3-year OS Decision Curve Analysis",
-       x = "Threshold probability", y = "Net benefit") +
-  coord_cartesian(xlim = c(0.05, 0.50)) +
-  theme_classic()
-
-ggsave("Figure_3_DCA_3Year.pdf", p_dca, width = 8, height = 6)
+                       Pathological_stage, data = cindex_data, x = TRUE)
 
 # ============================================================================
 # 8. C-index comparison

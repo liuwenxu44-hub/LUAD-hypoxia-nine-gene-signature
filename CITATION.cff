@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite the associated manuscript."
-title: "Analysis code for a hypoxia-related nine-gene signature in lung adenocarcinoma"
+title: "Analysis code for a LUAD hypoxia-related nine-gene signature retrospective observational study"
 authors:
   - family-names: Liu
     given-names: Wenxu
@@ -10,7 +10,7 @@ authors:
     given-names: Yongguang
   - family-names: Liu
     given-names: Zhe
-version: "1.0-submission"
-date-released: "2026-06-16"
+version: "1.0-medicine-submission"
+date-released: "2026-06-28"
 repository-code: "https://github.com/liuwenxu44-hub/LUAD-hypoxia-nine-gene-signature"
-abstract: "R scripts supporting retrospective public-cohort analyses, single-cell projection, immune/drug-response estimation, genomic-context analyses, and exploratory RT-qPCR support for a LUAD hypoxia-related nine-gene signature manuscript."
+abstract: "R scripts supporting retrospective public-cohort analyses, single-cell projection, pathway and immune-context analyses, drug-response estimation, genomic-context analyses, same-cohort model benchmarking, and RT-qPCR hypoxia-response support for a LUAD hypoxia-related nine-gene signature manuscript."

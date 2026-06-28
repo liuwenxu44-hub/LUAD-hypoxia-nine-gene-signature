@@ -1,33 +1,19 @@
 options(stringsAsFactors = FALSE)
 
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
-out_dir <- file.path(root, "Journal_of_Cancer_revision_outputs")
+out_dir <- file.path(root, "Medicine_supportive_outputs")
 
-tcga <- read.csv(file.path(out_dir, "JOC_TCGA_scores_survival_model_comparison.csv"), check.names = FALSE)
-comp <- read.csv(file.path(out_dir, "JOC_model_comparison_TCGA.csv"), check.names = FALSE)
-mut <- read.csv(file.path(out_dir, "JOC_TCGA_TMB_by_risk.csv"), check.names = FALSE)
-driver <- read.csv(file.path(out_dir, "JOC_TCGA_driver_mutation_by_risk.csv"), check.names = FALSE)
-gse <- read.csv(file.path(out_dir, "JOC_GSE50081_scores_survival.csv"), check.names = FALSE)
-gse_res <- read.csv(file.path(out_dir, "JOC_GSE50081_external_validation.csv"), check.names = FALSE)
+tcga <- read.csv(file.path(out_dir, "Medicine_TCGA_scores_survival_model_comparison.csv"), check.names = FALSE)
+comp <- read.csv(file.path(out_dir, "Medicine_model_comparison_TCGA.csv"), check.names = FALSE)
+mut <- read.csv(file.path(out_dir, "Medicine_TCGA_TMB_by_risk.csv"), check.names = FALSE)
+driver <- read.csv(file.path(out_dir, "Medicine_TCGA_driver_mutation_by_risk.csv"), check.names = FALSE)
+gse <- read.csv(file.path(out_dir, "Medicine_GSE50081_scores_survival.csv"), check.names = FALSE)
+gse_res <- read.csv(file.path(out_dir, "Medicine_GSE50081_supportive_evaluation.csv"), check.names = FALSE)
 
 library(survival)
 
-decision_curve <- function(lp, time, event, thresholds = seq(0.05, 0.8, by = 0.05)) {
-  horizon <- 365 * 5
-  keep <- (time >= horizon) | (event == 1 & time <= horizon)
-  y <- ifelse(event[keep] == 1 & time[keep] <= horizon, 1, 0)
-  p <- stats::plogis(scale(lp[keep])[, 1])
-  sapply(thresholds, function(pt) {
-    pred <- p >= pt
-    tp <- sum(pred & y == 1)
-    fp <- sum(pred & y == 0)
-    n <- length(y)
-    tp / n - fp / n * (pt / (1 - pt))
-  })
-}
-
 draw_fig10 <- function() {
-  par(mfrow = c(1, 2), mar = c(6, 5, 3, 1), oma = c(0, 0, 0, 0), cex = 0.9)
+  par(mar = c(6, 5, 3, 1), oma = c(0, 0, 0, 0), cex = 0.9)
   comp$short <- c("Nine-gene", "Hypoxia\nmarker", "LDHA", "GAPDH")
   cols <- c("#2f6f9f", "#8a8a8a", "#b45f06", "#6aa84f")
   yy <- comp$c_index
@@ -40,20 +26,6 @@ draw_fig10 <- function() {
   axis(1, at = xx, labels = c("Nine-gene", "Hypoxia", "LDHA", "GAPDH"), cex.axis = 0.78)
   text(xx, yy + 0.006, labels = sprintf("%.3f", yy), cex = 0.85)
   mtext("A", side = 3, line = 1, at = par("usr")[1], adj = 0, font = 2, cex = 1.2)
-
-  ths <- seq(0.05, 0.8, by = 0.05)
-  dc_risk <- decision_curve(tcga$risk_score, tcga$OS_time, tcga$OS_event, ths)
-  dc_hyp <- decision_curve(tcga$hypoxia_marker_score, tcga$OS_time, tcga$OS_event, ths)
-  ylim <- range(c(dc_risk, dc_hyp, 0), na.rm = TRUE)
-  plot(ths, dc_risk, type = "l", lwd = 2, col = "#2f6f9f", ylim = ylim,
-       xlab = "Threshold probability", ylab = "Net benefit",
-       main = "Exploratory 5-year DCA")
-  lines(ths, dc_hyp, lwd = 2, col = "#8a8a8a")
-  abline(h = 0, lty = 2, col = "gray55")
-  legend("topright", legend = c("Nine-gene score", "Hypoxia marker score", "Treat none"),
-         col = c("#2f6f9f", "#8a8a8a", "gray55"), lwd = c(2, 2, 1),
-         lty = c(1, 1, 2), bty = "n", cex = 0.82)
-  mtext("B", side = 3, line = 1, at = par("usr")[1], adj = 0, font = 2, cex = 1.2)
 }
 
 draw_fig11 <- function() {
@@ -89,7 +61,7 @@ draw_figs1 <- function() {
   km <- survfit(Surv(OS_time, OS_event) ~ risk_group, data = gse)
   plot(km, col = c("#74a9cf", "#ef8a62"), lwd = 2,
        xlab = "Time (days)", ylab = "Overall survival probability",
-       main = "GSE50081 external validation")
+       main = "GSE50081 supportive evaluation")
   legend("bottomleft", legend = c("Low-risk", "High-risk"),
          col = c("#74a9cf", "#ef8a62"), lwd = 2, bty = "n")
   gr <- gse_res[gse_res$model == "high versus low risk", ]
@@ -110,7 +82,7 @@ save_all <- function(stem, draw_fun, width, height) {
   dev.off()
 }
 
-save_all("Figure10_model_comparison_DCA", draw_fig10, 7.6, 3.8)
+save_all("Figure10_model_comparison", draw_fig10, 4.8, 3.8)
 save_all("Figure11_mutation_TMB_driver", draw_fig11, 7.6, 3.8)
 save_all("FigureS1_GSE50081_external_validation", draw_figs1, 4.8, 3.8)
 

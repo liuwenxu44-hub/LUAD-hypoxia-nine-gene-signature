@@ -1,7 +1,7 @@
 options(stringsAsFactors = FALSE)
 
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
-out_dir <- file.path(root, "Journal_of_Cancer_revision_outputs")
+out_dir <- file.path(root, "Medicine_supportive_outputs")
 data_dir <- file.path(out_dir, "data_cache")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
@@ -164,8 +164,8 @@ res <- rbind(
   )
 )
 
-utils::write.csv(ph, file.path(out_dir, "JOC_GSE50081_scores_survival.csv"), row.names = FALSE)
-utils::write.csv(res, file.path(out_dir, "JOC_GSE50081_external_validation.csv"), row.names = FALSE)
+utils::write.csv(ph, file.path(out_dir, "Medicine_GSE50081_scores_survival.csv"), row.names = FALSE)
+utils::write.csv(res, file.path(out_dir, "Medicine_GSE50081_supportive_evaluation.csv"), row.names = FALSE)
 
 png(file.path(out_dir, "FigureS1_GSE50081_external_validation.png"), width = 1800, height = 1400, res = 300)
 par(mar = c(5, 5, 3, 1))

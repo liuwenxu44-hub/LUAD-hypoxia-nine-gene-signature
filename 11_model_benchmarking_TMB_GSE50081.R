@@ -1,9 +1,9 @@
 options(stringsAsFactors = FALSE)
 
-message("Journal of Cancer revision analysis started")
+message("Supportive analysis started")
 
 root <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
-out_dir <- file.path(root, "Journal_of_Cancer_revision_outputs")
+out_dir <- file.path(root, "Medicine_supportive_outputs")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 data_dir <- file.path(out_dir, "data_cache")
 dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
@@ -106,7 +106,7 @@ tcga_df$hypoxia_marker_score <- colMeans(z_marker, na.rm = TRUE)
 tcga_df$LDHA <- as.numeric(expr_by_symbol["LDHA", tcga_df$sample])
 tcga_df$GAPDH <- if ("GAPDH" %in% rownames(expr_by_symbol)) as.numeric(expr_by_symbol["GAPDH", tcga_df$sample]) else NA_real_
 
-utils::write.csv(tcga_df, file.path(out_dir, "JOC_TCGA_scores_survival_model_comparison.csv"), row.names = FALSE)
+utils::write.csv(tcga_df, file.path(out_dir, "Medicine_TCGA_scores_survival_model_comparison.csv"), row.names = FALSE)
 
 message("Model comparison")
 library(survival)
@@ -131,38 +131,15 @@ comp <- rbind(
   cox_summary(Surv(OS_time, OS_event) ~ GAPDH, tcga_df)
 )
 comp$label <- c("Nine-gene risk score", "Hypoxia marker score", "LDHA", "GAPDH")
-utils::write.csv(comp, file.path(out_dir, "JOC_model_comparison_TCGA.csv"), row.names = FALSE)
+utils::write.csv(comp, file.path(out_dir, "Medicine_model_comparison_TCGA.csv"), row.names = FALSE)
 
-png(file.path(out_dir, "Figure10_model_comparison_DCA.png"), width = 2400, height = 1200, res = 300)
-par(mfrow = c(1, 2), mar = c(5, 5, 3, 1))
+png(file.path(out_dir, "Figure10_model_comparison.png"), width = 1500, height = 1200, res = 300)
+par(mar = c(7, 5, 3, 1))
 bar_cols <- c("#2f6f9f", "#8a8a8a", "#b45f06", "#6aa84f")
 bp <- barplot(comp$c_index, names.arg = comp$label, ylim = c(0.45, max(comp$c_index, na.rm = TRUE) + 0.08),
               las = 2, col = bar_cols, ylab = "Harrell's C-index", main = "Model discrimination in TCGA-LUAD")
 text(bp, comp$c_index + 0.015, labels = sprintf("%.3f", comp$c_index), cex = 0.8)
 abline(h = 0.5, lty = 2, col = "gray50")
-
-decision_curve <- function(lp, time, event, thresholds = seq(0.05, 0.8, by = 0.05)) {
-  # Binary endpoint: death observed within 5 years. Patients censored before 5 years are excluded.
-  horizon <- 365 * 5
-  keep <- (time >= horizon) | (event == 1 & time <= horizon)
-  y <- ifelse(event[keep] == 1 & time[keep] <= horizon, 1, 0)
-  p <- stats::plogis(scale(lp[keep])[, 1])
-  sapply(thresholds, function(pt) {
-    pred <- p >= pt
-    tp <- sum(pred & y == 1)
-    fp <- sum(pred & y == 0)
-    n <- length(y)
-    tp / n - fp / n * (pt / (1 - pt))
-  })
-}
-ths <- seq(0.05, 0.8, by = 0.05)
-dc_risk <- decision_curve(tcga_df$risk_score, tcga_df$OS_time, tcga_df$OS_event, ths)
-dc_hyp <- decision_curve(tcga_df$hypoxia_marker_score, tcga_df$OS_time, tcga_df$OS_event, ths)
-plot(ths, dc_risk, type = "l", lwd = 2, col = "#2f6f9f", ylim = range(c(dc_risk, dc_hyp, 0), na.rm = TRUE),
-     xlab = "Threshold probability", ylab = "Net benefit", main = "Exploratory decision curve")
-lines(ths, dc_hyp, lwd = 2, col = "#8a8a8a")
-abline(h = 0, lty = 2, col = "gray50")
-legend("topright", legend = c("Nine-gene score", "Hypoxia marker score", "Treat none"), col = c("#2f6f9f", "#8a8a8a", "gray50"), lwd = c(2, 2, 1), lty = c(1, 1, 2), bty = "n", cex = 0.8)
 dev.off()
 
 message("Downloading GDC MAF metadata")
@@ -232,8 +209,8 @@ driver_res <- do.call(rbind, lapply(drivers, function(g) {
   )
 }))
 driver_res$FDR <- p.adjust(driver_res$p, method = "BH")
-utils::write.csv(mut_df, file.path(out_dir, "JOC_TCGA_TMB_by_risk.csv"), row.names = FALSE)
-utils::write.csv(driver_res, file.path(out_dir, "JOC_TCGA_driver_mutation_by_risk.csv"), row.names = FALSE)
+utils::write.csv(mut_df, file.path(out_dir, "Medicine_TCGA_TMB_by_risk.csv"), row.names = FALSE)
+utils::write.csv(driver_res, file.path(out_dir, "Medicine_TCGA_driver_mutation_by_risk.csv"), row.names = FALSE)
 
 png(file.path(out_dir, "Figure11_mutation_TMB_driver.png"), width = 2400, height = 1200, res = 300)
 par(mfrow = c(1, 2), mar = c(5, 5, 3, 1))
@@ -249,7 +226,7 @@ barplot(x, beside = TRUE, names.arg = topd$Gene, las = 2, col = c("#74a9cf", "#e
 legend("topright", legend = c("Low-risk", "High-risk"), fill = c("#74a9cf", "#ef8a62"), bty = "n", cex = 0.8)
 dev.off()
 
-message("Second GEO validation")
+message("Supportive public-cohort evaluation")
 parse_geo_matrix <- function(gse, url) {
   path <- download_file(url, file.path(data_dir, paste0(gse, "_series_matrix.txt.gz")))
   con <- gzfile(path, "rt")
@@ -332,10 +309,10 @@ validate_geo <- function(gse, gpl, url) {
     time_col = os_time_col,
     event_col = os_event_col
   )
-  utils::write.csv(ph, file.path(out_dir, paste0("JOC_", gse, "_external_validation_samples.csv")), row.names = FALSE)
-  png(file.path(out_dir, paste0("FigureS_", gse, "_external_validation_KM.png")), width = 1500, height = 1200, res = 300)
+  utils::write.csv(ph, file.path(out_dir, paste0("Medicine_", gse, "_supportive_evaluation_samples.csv")), row.names = FALSE)
+  png(file.path(out_dir, paste0("FigureS_", gse, "_supportive_evaluation_KM.png")), width = 1500, height = 1200, res = 300)
   sf <- survfit(Surv(OS_time, OS_event) ~ risk_group, data = ph)
-  plot(sf, col = c("#74a9cf", "#ef8a62"), lwd = 2, xlab = "Time", ylab = "Overall survival probability", main = paste0(gse, " external validation"))
+  plot(sf, col = c("#74a9cf", "#ef8a62"), lwd = 2, xlab = "Time", ylab = "Overall survival probability", main = paste0(gse, " supportive evaluation"))
   legend("bottomleft", legend = paste0(names(sf$strata), " (n=", sf$n, ")"), col = c("#74a9cf", "#ef8a62"), lwd = 2, bty = "n", cex = 0.8)
   mtext(sprintf("Log-rank P = %.3g", p_lr_val), side = 3, line = 0.2, cex = 0.8)
   dev.off()
@@ -350,7 +327,7 @@ geo_candidates <- list(
 geo_results <- list()
 for (cand in geo_candidates) {
   res <- tryCatch(validate_geo(cand$gse, cand$gpl, cand$url), error = function(e) {
-    message("External validation failed for ", cand$gse, ": ", conditionMessage(e))
+    message("Supportive evaluation failed for ", cand$gse, ": ", conditionMessage(e))
     NULL
   })
   if (!is.null(res)) {
@@ -360,9 +337,9 @@ for (cand in geo_candidates) {
 }
 if (length(geo_results)) {
   geo_sum <- do.call(rbind, geo_results)
-  utils::write.csv(geo_sum, file.path(out_dir, "JOC_additional_GEO_external_validation_summary.csv"), row.names = FALSE)
+  utils::write.csv(geo_sum, file.path(out_dir, "Medicine_additional_GEO_supportive_evaluation_summary.csv"), row.names = FALSE)
 } else {
-  writeLines("No additional GEO validation cohort could be parsed automatically.", file.path(out_dir, "JOC_additional_GEO_external_validation_summary.txt"))
+  writeLines("No additional GEO cohort could be parsed automatically.", file.path(out_dir, "Medicine_additional_GEO_supportive_evaluation_summary.txt"))
 }
 
-message("Journal of Cancer revision analysis finished")
+message("Supportive analysis finished")
