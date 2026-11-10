@@ -1,15 +1,10 @@
 cff-version: 1.2.0
-message: "If you use this code, please cite the associated manuscript."
+message: "Cite this repository for the analysis code and the associated article for the research. See README.md for the article authors."
+type: software
 title: "Analysis code for a LUAD hypoxia-related nine-gene signature retrospective observational study"
 authors:
   - family-names: Liu
     given-names: Wenxu
-  - family-names: Zheng
-    given-names: Yipan
-  - family-names: Tao
-    given-names: Yongguang
-  - family-names: Liu
-    given-names: Zhe
 version: "1.0-medicine-submission"
 date-released: "2026-06-28"
 repository-code: "https://github.com/liuwenxu44-hub/LUAD-hypoxia-nine-gene-signature"

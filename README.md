@@ -6,6 +6,10 @@ The scripts accompany:
 
 **A Hypoxia-Related Nine-Gene Signature Associated With Overall Survival and Tumor Biology in Lung Adenocarcinoma: A Retrospective Observational Study**
 
+Research article authors: Wenxu Liu, Yipan Zheng, Yongguang Tao, and Zhe Liu.
+
+Repository maintainer: [Wenxu Liu](https://github.com/liuwenxu44-hub).
+
 The repository also includes single-cell, pathway, immune-context, mutation and predicted drug-response analyses, plus plotting support for the RT-qPCR hypoxia experiments. These are research analyses, not a clinical decision tool. The drug-response estimates are computational predictions, not measured patient treatment responses.
 
 ## Repository Contents
